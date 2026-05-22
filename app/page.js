@@ -1,33 +1,64 @@
 import BridgeWidget       from '@/components/BridgeWidget'
 import RecentTransactions from '@/components/RecentTransactions'
-import { STATS, CHAINS }  from '@/lib/data'
+import PopularRoutes      from '@/components/PopularRoutes'
+import WhyVaultBridge     from '@/components/WhyVaultBridge'
+import SupportedChains    from '@/components/SupportedChains'
+import StatsBar           from '@/components/StatsBar'
 
 export default function HomePage() {
   return (
-    <div className="page-wrapper" style={{ minHeight: 'calc(100vh - 58px)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start', padding: '36px 16px 48px', gap: 16 }}>
+    <div className="page-wrapper">
 
-      <BridgeWidget />
-      <RecentTransactions />
+      {/* Stats bar — Across-style credibility strip */}
+      <StatsBar />
 
-      {/* Bottom stats — quiet, unobtrusive */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 28, marginTop: 8 }}>
-        {[
-          { label: 'TVL',    value: STATS.tvl      },
-          { label: 'Vol',    value: STATS.volume24 },
-          { label: 'Chains', value: STATS.chains   },
-          { label: 'Txns',   value: STATS.txCount  },
-        ].map((s, i) => (
-          <div key={s.label} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-            <span style={{ fontSize: 10, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '.06em', color: 'var(--t4)' }}>
-              {s.label}
-            </span>
-            <span className="mono" style={{ fontSize: 12, fontWeight: 700, color: 'var(--t3)' }}>
-              {s.value}
-            </span>
-            {i < 3 && <span style={{ fontSize: 10, color: 'var(--border-hi)', marginLeft: 6 }}>·</span>}
+      {/* Main section */}
+      <div style={{
+        maxWidth: 1080, margin: '0 auto',
+        padding: '40px 20px 0',
+        display: 'grid',
+        gridTemplateColumns: '1fr',
+        gap: 24,
+        alignItems: 'start',
+      }}>
+
+        {/* Desktop: 3-column, Mobile: 1-column */}
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+          gap: 20,
+          alignItems: 'start',
+        }}>
+          {/* Left col: Bridge widget */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+            <BridgeWidget />
+            <RecentTransactions />
           </div>
-        ))}
+
+          {/* Right col: Popular routes + Why VaultBridge */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+            <PopularRoutes />
+            <WhyVaultBridge />
+          </div>
+        </div>
+
       </div>
+
+      {/* Supported chains strip */}
+      <div style={{ maxWidth: 1080, margin: '0 auto', padding: '0 20px' }}>
+        <SupportedChains />
+      </div>
+
+      {/* Footer */}
+      <footer style={{
+        borderTop: '1px solid var(--border)',
+        padding: '24px 20px',
+        textAlign: 'center',
+      }}>
+        <p style={{ fontSize: 11, color: 'var(--t4)' }}>
+          VaultBridge · Not financial advice · Always verify addresses before bridging
+        </p>
+      </footer>
 
     </div>
   )

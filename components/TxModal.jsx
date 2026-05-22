@@ -123,7 +123,15 @@ export default function TxModal({ params, onClose }) {
                     <p style={{ fontSize: 11, color: 'var(--t3)', marginTop: 2 }}>{s.sub}</p>
                   )}
                   {isDone && i === 1 && (
-                    <p className="mono" style={{ fontSize: 10, color: 'var(--t4)', marginTop: 2 }}>{mockHash}</p>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 2 }}>
+                      <p className="mono" style={{ fontSize: 10, color: 'var(--t4)' }}>{mockHash}</p>
+                      <a href="#" onClick={e => e.preventDefault()} style={{
+                        fontSize: 10, color: 'var(--blue)', textDecoration: 'none', fontWeight: 600,
+                        display: 'flex', alignItems: 'center', gap: 3,
+                      }}>
+                        Explorer ↗
+                      </a>
+                    </div>
                   )}
                 </div>
 
