@@ -29,40 +29,48 @@ export default function TokenSelector({ value, onChange, chain }) {
   return (
     <div className="relative" ref={ref}>
       <button className="pill" onClick={() => setOpen(o => !o)} aria-haspopup="listbox" aria-expanded={open}>
-        <span className="text-sm leading-none">{tok?.icon ?? '?'}</span>
-        <span>{value}</span>
+        <span style={{ fontSize: 16, lineHeight: 1 }}>{tok?.icon ?? '?'}</span>
+        <span style={{ fontWeight: 700, fontSize: 14 }}>{value}</span>
         <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"
-          style={{ transform: open ? 'rotate(180deg)' : 'none', transition: 'transform .2s' }}>
+          className={`pill-caret${open ? ' open' : ''}`}>
           <polyline points="6 9 12 15 18 9"/>
         </svg>
       </button>
 
       {open && (
-        <div className="dropdown slide-down" style={{ top: 'calc(100% + 6px)', left: 0, minWidth: 230 }}>
-          <div className="p-2">
+        <div className="dropdown slide-down" style={{ top: 'calc(100% + 6px)', left: 0, minWidth: 248 }}>
+          <div style={{ padding: '10px 10px 6px' }}>
             <input ref={inputRef} value={search} onChange={e => setSearch(e.target.value)}
-              placeholder="Search token…"
-              style={{
-                width: '100%', padding: '7px 11px', borderRadius: 9,
-                background: 'var(--bg-input)', border: '1px solid var(--border)',
-                color: 'var(--t1)', fontSize: 12, outline: 'none',
-              }} />
+              placeholder="Search token…" className="dd-search" />
           </div>
-          <div className="pb-1.5 max-h-60 overflow-y-auto no-sb">
+
+          <div className="no-sb" style={{ maxHeight: 280, overflowY: 'auto', paddingBottom: 6 }}>
             {list.length === 0
-              ? <p className="px-3 py-4 text-xs text-center" style={{ color: 'var(--t3)' }}>No tokens on this chain</p>
+              ? <p style={{ padding: '20px 14px', fontSize: 12, color: 'var(--t3)', textAlign: 'center' }}>
+                  No tokens on this chain
+                </p>
               : list.map(t => (
                 <div key={t.symbol} role="option" aria-selected={t.symbol === value}
                   onClick={() => { onChange(t.symbol); setOpen(false) }}
                   className={`dd-item ${t.symbol === value ? 'active' : ''}`}>
-                  <span className="text-base leading-none w-5 text-center">{t.icon}</span>
-                  <div className="flex-1">
-                    <p className="font-semibold" style={{ color: 'var(--t1)' }}>{t.symbol}</p>
-                    <p className="text-[10px]" style={{ color: 'var(--t3)' }}>{t.name}</p>
+                  <span style={{
+                    width: 34, height: 34, borderRadius: '50%',
+                    background: 'var(--bg-hover)',
+                    border: '1px solid var(--border)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    fontSize: 17, flexShrink: 0,
+                  }}>{t.icon}</span>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <p style={{ fontWeight: 700, color: 'var(--t1)', fontSize: 13 }}>{t.symbol}</p>
+                    <p style={{ fontSize: 10, color: 'var(--t3)', marginTop: 1 }}>{t.name}</p>
                   </div>
-                  <div className="text-right">
-                    <p className="text-[11px] mono font-medium" style={{ color: 'var(--t2)' }}>{MOCK_BALANCES[t.symbol] ?? '—'}</p>
-                    <p className="text-[10px]" style={{ color: 'var(--t4)' }}>${t.price.toLocaleString()}</p>
+                  <div style={{ textAlign: 'right' }}>
+                    <p className="mono" style={{ fontSize: 12, fontWeight: 600, color: 'var(--t2)' }}>
+                      {MOCK_BALANCES[t.symbol] ?? '—'}
+                    </p>
+                    <p style={{ fontSize: 10, color: 'var(--t4)', marginTop: 1 }}>
+                      ${t.price.toLocaleString()}
+                    </p>
                   </div>
                 </div>
               ))

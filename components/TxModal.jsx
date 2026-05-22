@@ -3,21 +3,13 @@ import { useState, useEffect } from 'react'
 import { CHAINS } from '@/lib/data'
 
 const STEPS = [
-  { label: 'Approve token',           sub: 'Authorizing contract spend…'     },
-  { label: 'Submit to bridge',        sub: 'Sending transaction…'             },
-  { label: 'Confirming on source',    sub: 'Waiting for block confirmations…' },
-  { label: 'Relaying cross-chain',    sub: 'Bridging to destination…'         },
-  { label: 'Delivered',               sub: 'Funds arrived!'                   },
+  { label: 'Approve token',          sub: 'Authorizing contract spend…'     },
+  { label: 'Submit to bridge',       sub: 'Signing and sending transaction…' },
+  { label: 'Confirming source chain',sub: 'Awaiting block confirmations…'    },
+  { label: 'Relaying cross-chain',   sub: 'Bridging to destination network…' },
+  { label: 'Delivered',              sub: 'Assets arrived safely!'            },
 ]
-const DELAYS = [1000, 2200, 3800, 4500]
-
-function CheckIcon() {
-  return (
-    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-      <polyline points="20 6 9 17 4 12"/>
-    </svg>
-  )
-}
+const DELAYS = [1100, 2400, 4000, 5000]
 
 export default function TxModal({ params, onClose }) {
   const [step, setStep] = useState(0)
@@ -32,73 +24,113 @@ export default function TxModal({ params, onClose }) {
     return () => clearTimeout(id)
   }, [step, done])
 
-  const mockHash = '0x' + Array.from({ length: 8 }, () => Math.floor(Math.random() * 16).toString(16)).join('') + '…'
+  const mockHash = '0x' + Array.from({ length: 8 }, () =>
+    Math.floor(Math.random() * 16).toString(16)
+  ).join('') + '…'
 
   return (
     <div className="backdrop fade-in" onClick={e => { if (e.target === e.currentTarget && done) onClose() }}>
-      <div className="bridge-card fade-up" style={{ width: '100%', maxWidth: 420 }}>
+      <div className="bridge-card fade-up" style={{ maxWidth: 420 }}>
 
         {/* Header */}
-        <div className="flex items-center justify-between p-5 border-b" style={{ borderColor: 'var(--border)' }}>
+        <div style={{
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          padding: '20px 20px 16px',
+          borderBottom: '1px solid var(--border)',
+        }}>
           <div>
-            <p className="font-bold text-[15px]" style={{ color: 'var(--t1)' }}>
-              {done ? 'Bridge complete' : 'Bridging…'}
+            <p style={{ fontWeight: 800, fontSize: 15, color: 'var(--t1)' }}>
+              {done ? '✓ Bridge complete' : 'Bridging in progress'}
             </p>
-            <p className="text-[11px] mt-0.5" style={{ color: 'var(--t3)' }}>
+            <p style={{ fontSize: 11, color: 'var(--t3)', marginTop: 3 }}>
               {fc.icon} {fc.name} → {tc.icon} {tc.name}
             </p>
           </div>
           {done && (
-            <button onClick={onClose} className="btn-ghost">Close</button>
+            <button className="btn-ghost" onClick={onClose}>Close</button>
           )}
         </div>
 
-        {/* Amount row */}
-        <div className="mx-5 mt-4 p-3 rounded-2xl flex items-center justify-between"
-          style={{ background: 'var(--bg-panel)', border: '1px solid var(--border)' }}>
-          <div>
-            <p className="text-[10px] font-semibold mb-0.5" style={{ color: 'var(--t3)' }}>SENDING</p>
-            <p className="text-xl font-black mono" style={{ color: 'var(--t1)' }}>{amount} {token}</p>
-          </div>
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ color: 'var(--t4)' }}>
-            <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
-          </svg>
-          <div className="text-right">
-            <p className="text-[10px] font-semibold mb-0.5" style={{ color: 'var(--t3)' }}>RECEIVING</p>
-            <p className="text-xl font-black mono" style={{ color: done ? 'var(--green)' : 'var(--t1)' }}>
-              {fee.receiveAmount} {token}
-            </p>
+        {/* Amount card */}
+        <div style={{ padding: '16px 20px 0' }}>
+          <div style={{
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+            padding: '14px 16px', borderRadius: 16,
+            background: 'var(--bg-panel)', border: '1px solid var(--border)',
+          }}>
+            <div>
+              <p style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.06em', color: 'var(--t3)', marginBottom: 4 }}>
+                Sending
+              </p>
+              <p className="mono" style={{ fontSize: 20, fontWeight: 800, color: 'var(--t1)' }}>
+                {amount} {token}
+              </p>
+            </div>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ color: 'var(--t4)' }}>
+              <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
+            </svg>
+            <div style={{ textAlign: 'right' }}>
+              <p style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.06em', color: 'var(--t3)', marginBottom: 4 }}>
+                Receiving
+              </p>
+              <p className="mono" style={{ fontSize: 20, fontWeight: 800, color: done ? 'var(--green)' : 'var(--t1)' }}>
+                {fee.receiveAmount} {token}
+              </p>
+            </div>
           </div>
         </div>
 
         {/* Steps */}
-        <div className="px-5 py-4 space-y-3">
+        <div style={{ padding: '20px 20px 0', display: 'flex', flexDirection: 'column', gap: 14 }}>
           {STEPS.map((s, i) => {
             const isDone   = i < step
             const isActive = i === step && !done
 
             return (
-              <div key={i} className="flex items-center gap-3">
-                {/* Icon */}
-                <div className="w-7 h-7 rounded-full flex items-center justify-center shrink-0"
-                  style={{
-                    background: isDone   ? 'rgba(34,197,94,.12)'  :
-                                isActive ? 'rgba(59,130,246,.12)'  : 'var(--bg-panel)',
-                    border: `1px solid ${isDone ? 'rgba(34,197,94,.25)' : isActive ? 'rgba(59,130,246,.3)' : 'var(--border)'}`,
-                  }}>
-                  {isDone   && <span style={{ color: 'var(--green)' }}><CheckIcon /></span>}
-                  {isActive && <div className="spinner" style={{ width: 13, height: 13 }} />}
-                  {!isDone && !isActive && <div className="w-2 h-2 rounded-full" style={{ background: 'var(--t4)' }} />}
+              <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 12 }}>
+                {/* Step circle */}
+                <div style={{
+                  width: 32, height: 32, borderRadius: '50%', flexShrink: 0,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  background: isDone   ? 'rgba(34,197,94,.12)' :
+                              isActive ? 'rgba(59,130,246,.12)' : 'var(--bg-panel)',
+                  border: `1px solid ${
+                    isDone   ? 'rgba(34,197,94,.3)' :
+                    isActive ? 'rgba(59,130,246,.35)' : 'var(--border)'
+                  }`,
+                  boxShadow: isActive ? '0 0 0 3px rgba(59,130,246,.08)' : 'none',
+                  transition: 'all .3s',
+                }}>
+                  {isDone && (
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" style={{ color: 'var(--green)' }}>
+                      <polyline points="20 6 9 17 4 12"/>
+                    </svg>
+                  )}
+                  {isActive && <div className="spinner" />}
+                  {!isDone && !isActive && (
+                    <div style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--t4)' }} />
+                  )}
                 </div>
 
-                {/* Label */}
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold" style={{
-                    color: isDone ? 'var(--green)' : isActive ? 'var(--t1)' : 'var(--t4)'
+                {/* Text */}
+                <div style={{ flex: 1, paddingTop: 5 }}>
+                  <p style={{
+                    fontSize: 13, fontWeight: 600,
+                    color: isDone ? 'var(--green)' : isActive ? 'var(--t1)' : 'var(--t4)',
+                    transition: 'color .3s',
                   }}>{s.label}</p>
-                  {isActive && <p className="text-[11px]" style={{ color: 'var(--t3)' }}>{s.sub}</p>}
-                  {isDone && i === 1 && <p className="text-[10px] mono" style={{ color: 'var(--t4)' }}>{mockHash}</p>}
+                  {isActive && (
+                    <p style={{ fontSize: 11, color: 'var(--t3)', marginTop: 2 }}>{s.sub}</p>
+                  )}
+                  {isDone && i === 1 && (
+                    <p className="mono" style={{ fontSize: 10, color: 'var(--t4)', marginTop: 2 }}>{mockHash}</p>
+                  )}
                 </div>
+
+                {/* Step number */}
+                {!isDone && !isActive && (
+                  <span style={{ fontSize: 11, color: 'var(--t4)', paddingTop: 6 }}>{i + 1}</span>
+                )}
               </div>
             )
           })}
@@ -106,17 +138,26 @@ export default function TxModal({ params, onClose }) {
 
         {/* Progress bar */}
         {!done && (
-          <div className="mx-5 mb-5 h-0.5 rounded-full overflow-hidden" style={{ background: 'var(--border)' }}>
-            <div className="h-full rounded-full transition-all duration-700"
-              style={{ width: `${(step / STEPS.length) * 100}%`, background: 'var(--blue)' }} />
+          <div style={{ margin: '20px 20px 0', height: 3, borderRadius: 99, background: 'var(--border)', overflow: 'hidden' }}>
+            <div style={{
+              height: '100%', borderRadius: 99,
+              width: `${(step / STEPS.length) * 100}%`,
+              background: 'linear-gradient(90deg, var(--blue), var(--purple))',
+              transition: 'width .7s cubic-bezier(.16,1,.3,1)',
+            }} />
           </div>
         )}
 
-        {done && (
-          <div className="px-5 pb-5">
-            <button onClick={onClose} className="btn-bridge">Bridge again</button>
-          </div>
-        )}
+        {/* Done CTA */}
+        <div style={{ padding: done ? '20px 20px 20px' : '16px 20px 20px' }}>
+          {done ? (
+            <button className="btn-bridge" onClick={onClose}>Bridge again</button>
+          ) : (
+            <p style={{ fontSize: 11, color: 'var(--t4)', textAlign: 'center' }}>
+              Do not close this window during bridging
+            </p>
+          )}
+        </div>
 
       </div>
     </div>

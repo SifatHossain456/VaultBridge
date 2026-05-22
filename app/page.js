@@ -1,28 +1,30 @@
 import BridgeWidget       from '@/components/BridgeWidget'
 import RecentTransactions from '@/components/RecentTransactions'
-import { STATS }          from '@/lib/data'
+import { STATS, CHAINS }  from '@/lib/data'
 
 export default function HomePage() {
   return (
-    <div className="min-h-[calc(100vh-56px)] flex flex-col items-center justify-start px-4 py-10 gap-5 fade-up">
+    <div className="page-wrapper" style={{ minHeight: 'calc(100vh - 58px)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start', padding: '36px 16px 48px', gap: 16 }}>
 
-      {/* Bridge widget — the single focus */}
       <BridgeWidget />
-
-      {/* Recent txs — directly below, same width */}
       <RecentTransactions />
 
-      {/* Footer stats — minimal, unobtrusive */}
-      <div className="flex items-center gap-6 pt-2">
+      {/* Bottom stats — quiet, unobtrusive */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 28, marginTop: 8 }}>
         {[
-          { label: 'TVL',     value: STATS.tvl      },
-          { label: 'Volume',  value: STATS.volume24 },
-          { label: 'Chains',  value: STATS.chains   },
-          { label: 'Txns',    value: STATS.txCount  },
-        ].map(s => (
-          <div key={s.label} className="text-center">
-            <p className="text-[10px] uppercase tracking-widest" style={{ color: 'var(--t4)' }}>{s.label}</p>
-            <p className="text-sm font-bold mono" style={{ color: 'var(--t2)' }}>{s.value}</p>
+          { label: 'TVL',    value: STATS.tvl      },
+          { label: 'Vol',    value: STATS.volume24 },
+          { label: 'Chains', value: STATS.chains   },
+          { label: 'Txns',   value: STATS.txCount  },
+        ].map((s, i) => (
+          <div key={s.label} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            <span style={{ fontSize: 10, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '.06em', color: 'var(--t4)' }}>
+              {s.label}
+            </span>
+            <span className="mono" style={{ fontSize: 12, fontWeight: 700, color: 'var(--t3)' }}>
+              {s.value}
+            </span>
+            {i < 3 && <span style={{ fontSize: 10, color: 'var(--border-hi)', marginLeft: 6 }}>·</span>}
           </div>
         ))}
       </div>
