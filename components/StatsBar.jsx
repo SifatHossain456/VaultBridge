@@ -1,7 +1,7 @@
 const STATS = [
   { value: '$4.82B', label: 'Total Volume',     color: '#3b82f6' },
   { value: '2.4M+',  label: 'Transactions',     color: '#22d3ee' },
-  { value: '~2s',    label: 'Avg Bridge Time',  color: '#22c55e' },
+  { value: '~2min',  label: 'Avg Bridge Time',  color: '#22c55e' },
   { value: '8',      label: 'Chains Supported', color: '#a78bfa' },
 ]
 
@@ -12,7 +12,7 @@ export default function StatsBar() {
       background: 'var(--bg-card)',
     }}>
       <div style={{
-        maxWidth: 1120, margin: '0 auto',
+        maxWidth: 1080, margin: '0 auto',
         padding: '0 20px',
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         gap: 0, flexWrap: 'wrap',

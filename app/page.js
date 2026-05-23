@@ -1,3 +1,5 @@
+'use client'
+import { useState } from 'react'
 import BridgeWidget       from '@/components/BridgeWidget'
 import RecentTransactions from '@/components/RecentTransactions'
 import PopularRoutes      from '@/components/PopularRoutes'
@@ -6,10 +8,17 @@ import SupportedChains    from '@/components/SupportedChains'
 import StatsBar           from '@/components/StatsBar'
 
 export default function HomePage() {
+  const [route, setRoute] = useState({ fromChain: 'ethereum', toChain: 'arbitrum', token: 'ETH', _key: 0 })
+
+  function handleRouteSelect({ fromChain, toChain, token }) {
+    setRoute(prev => ({ fromChain, toChain, token, _key: prev._key + 1 }))
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
   return (
     <div className="page-wrapper">
 
-      {/* Stats bar — Across-style credibility strip */}
+      {/* Stats bar */}
       <StatsBar />
 
       {/* Main section */}
@@ -22,7 +31,7 @@ export default function HomePage() {
         alignItems: 'start',
       }}>
 
-        {/* Desktop: 3-column, Mobile: 1-column */}
+        {/* Desktop: 2-column, Mobile: 1-column */}
         <div style={{
           display: 'grid',
           gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
@@ -31,13 +40,18 @@ export default function HomePage() {
         }}>
           {/* Left col: Bridge widget */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-            <BridgeWidget />
+            <BridgeWidget
+              key={route._key}
+              initialFrom={route.fromChain}
+              initialTo={route.toChain}
+              initialToken={route.token}
+            />
             <RecentTransactions />
           </div>
 
           {/* Right col: Popular routes + Why VaultBridge */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-            <PopularRoutes />
+            <PopularRoutes onSelect={handleRouteSelect} />
             <WhyVaultBridge />
           </div>
         </div>

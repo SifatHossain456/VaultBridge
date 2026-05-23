@@ -39,10 +39,10 @@ function InfoRow({ label, value, valueColor, sub }) {
 
 const SLIPPAGE_PRESETS = ['0.1', '0.5', '1.0']
 
-export default function BridgeWidget() {
-  const [fromChain, setFromChain] = useState('ethereum')
-  const [toChain,   setToChain]   = useState('arbitrum')
-  const [token,     setToken]     = useState('ETH')
+export default function BridgeWidget({ initialFrom = 'ethereum', initialTo = 'arbitrum', initialToken = 'ETH' }) {
+  const [fromChain, setFromChain] = useState(initialFrom)
+  const [toChain,   setToChain]   = useState(initialTo)
+  const [token,     setToken]     = useState(initialToken)
   const [amount,    setAmount]    = useState('')
   const [showModal, setShowModal] = useState(false)
   const [slippage,  setSlippage]  = useState('0.5')
