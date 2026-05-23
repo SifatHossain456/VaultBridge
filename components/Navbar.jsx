@@ -1,11 +1,13 @@
 'use client'
-import { useState } from 'react'
 import Link from 'next/link'
+import { useWallet } from '@/lib/WalletContext'
+import { useGasPrice } from '@/hooks/useGasPrice'
 
 const NAV_LINKS = ['Bridge', 'History', 'Pools', 'Docs']
 
 export default function Navbar() {
-  const [connected, setConnected] = useState(false)
+  const { address, shortAddress, chainName, connecting, connect, disconnect } = useWallet()
+  const gwei = useGasPrice()
 
   return (
     <header style={{ borderBottom: '1px solid var(--border)', background: 'rgba(8,9,14,.9)', backdropFilter: 'blur(12px)', position: 'sticky', top: 0, zIndex: 40 }}>
@@ -45,30 +47,37 @@ export default function Navbar() {
         {/* Right */}
         <div className="ml-auto flex items-center gap-2.5">
 
-          {/* Gas */}
+          {/* Live gas */}
           <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl"
             style={{ background: 'var(--bg-panel)', border: '1px solid var(--border)' }}>
-            <span className="gas-dot" style={{
-              width: 6, height: 6, borderRadius: '50%',
-              background: 'var(--green)', display: 'inline-block', flexShrink: 0,
+            <span style={{
+              width: 6, height: 6, borderRadius: '50%', flexShrink: 0, display: 'inline-block',
+              background: gwei === '—' ? 'var(--t4)' : 'var(--green)',
             }} />
-            <span className="mono" style={{ fontSize: 11, fontWeight: 600, color: 'var(--t2)' }}>14 gwei</span>
+            <span className="mono" style={{ fontSize: 11, fontWeight: 600, color: 'var(--t2)' }}>
+              {gwei} gwei
+            </span>
           </div>
 
-          {/* Network pill */}
-          <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl"
-            style={{ background: 'var(--bg-panel)', border: '1px solid var(--border)' }}>
-            <span style={{ fontSize: 13 }}>⟠</span>
-            <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--t2)' }}>Ethereum</span>
-          </div>
+          {/* Chain pill — only when connected */}
+          {address && chainName && (
+            <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl"
+              style={{ background: 'var(--bg-panel)', border: '1px solid var(--border)' }}>
+              <span style={{ fontSize: 13 }}>⟠</span>
+              <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--t2)' }}>{chainName}</span>
+            </div>
+          )}
 
           {/* Wallet button */}
-          <button onClick={() => setConnected(c => !c)}
+          <button
+            onClick={address ? disconnect : connect}
+            disabled={connecting}
             style={{
               display: 'flex', alignItems: 'center', gap: 7,
               padding: '8px 16px', borderRadius: 12, fontSize: 13, fontWeight: 600,
-              cursor: 'pointer', transition: 'all .2s',
-              ...(connected
+              cursor: connecting ? 'default' : 'pointer', transition: 'all .2s',
+              opacity: connecting ? 0.7 : 1,
+              ...(address
                 ? { background: 'var(--bg-panel)', color: 'var(--t1)', border: '1px solid var(--border)' }
                 : {
                     background: 'linear-gradient(135deg,#3b82f6,#2563eb)',
@@ -77,10 +86,10 @@ export default function Navbar() {
                   }
               ),
             }}>
-            {connected ? (
+            {connecting ? 'Connecting…' : address ? (
               <>
                 <span style={{ width: 7, height: 7, borderRadius: '50%', background: 'var(--green)', flexShrink: 0 }} />
-                0x4f3a…8c2d
+                {shortAddress}
               </>
             ) : 'Connect Wallet'}
           </button>

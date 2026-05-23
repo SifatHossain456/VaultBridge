@@ -3,7 +3,9 @@ import { useState, useCallback } from 'react'
 import ChainSelector from './ChainSelector'
 import TokenSelector from './TokenSelector'
 import TxModal       from './TxModal'
-import { TOKENS, MOCK_BALANCES, getBridgeFee, CHAINS } from '@/lib/data'
+import { TOKENS, getBridgeFee, CHAINS } from '@/lib/data'
+import { useWallet } from '@/lib/WalletContext'
+import { usePrices } from '@/hooks/usePrices'
 
 function SwapIcon() {
   return (
@@ -46,15 +48,39 @@ export default function BridgeWidget() {
   const [slippage,  setSlippage]  = useState('0.5')
   const [showSlip,  setShowSlip]  = useState(false)
 
-  const fee        = getBridgeFee(amount, token)
+  const { address, balances: walletBalances, connect } = useWallet()
+  const prices = usePrices()
+
   const tokMeta    = TOKENS.find(t => t.symbol === token)
-  const balance    = MOCK_BALANCES[token] ?? '0'
-  const balanceNum = parseFloat(balance.replace(/,/g, ''))
+  const tokenPrice = prices[token] ?? tokMeta?.price ?? 0
+
+  // Real balance when connected, dash when not
+  const balance    = address ? (walletBalances[token] ?? '0.0000') : '--'
+  const balanceNum = address ? parseFloat(balance) : Infinity
+
   const amountNum  = parseFloat(amount)
-  const usdValue   = amount && tokMeta && !isNaN(amountNum)
-    ? (amountNum * tokMeta.price) : null
-  const overBalance = !isNaN(amountNum) && amountNum > balanceNum
-  const canBridge   = !!fee && amountNum > 0 && !overBalance
+  const usdValue   = amount && tokenPrice && !isNaN(amountNum) ? amountNum * tokenPrice : null
+  const overBalance = address && !isNaN(amountNum) && amountNum > balanceNum
+  const fee        = getBridgeFee(amount, token, tokenPrice || undefined)
+  const canBridge  = !!fee && amountNum > 0 && !overBalance && !!address
+
+  // Button state
+  let btnLabel, btnAction, btnDisabled
+  if (!address) {
+    btnLabel    = amountNum > 0 ? 'Connect Wallet' : 'Enter an amount'
+    btnAction   = amountNum > 0 ? connect : undefined
+    btnDisabled = !(amountNum > 0)
+  } else if (overBalance) {
+    btnLabel    = 'Insufficient balance'
+    btnDisabled = true
+  } else if (canBridge) {
+    btnLabel    = `Bridge ${amount} ${token} →`
+    btnAction   = () => setShowModal(true)
+    btnDisabled = false
+  } else {
+    btnLabel    = 'Enter an amount'
+    btnDisabled = true
+  }
 
   const swapChains = useCallback(() => {
     setFromChain(prev => { setToChain(prev); return toChain })
@@ -113,9 +139,11 @@ export default function BridgeWidget() {
               </span>
               <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                 <span style={{ fontSize: 11, color: 'var(--t3)' }}>
-                  Balance: <span style={{ color: 'var(--t2)', fontWeight: 600 }}>{balance} {token}</span>
+                  Balance: <span style={{ color: 'var(--t2)', fontWeight: 600 }}>{balance} {balance !== '--' ? token : ''}</span>
                 </span>
-                <button className="max-btn" onClick={() => setAmount(balance.replace(/,/g, ''))}>MAX</button>
+                {address && (
+                  <button className="max-btn" onClick={() => setAmount(String(parseFloat(balance) || 0))}>MAX</button>
+                )}
               </div>
             </div>
 
@@ -259,8 +287,8 @@ export default function BridgeWidget() {
 
         {/* ── Bridge button ── */}
         <div style={{ padding: '12px 20px 20px' }}>
-          <button disabled={!canBridge} onClick={() => setShowModal(true)} className="btn-bridge">
-            {overBalance ? 'Insufficient balance' : canBridge ? `Bridge ${amount} ${token} →` : 'Enter an amount'}
+          <button disabled={btnDisabled} onClick={btnAction} className="btn-bridge">
+            {btnLabel}
           </button>
         </div>
 
